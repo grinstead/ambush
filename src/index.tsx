@@ -1,7 +1,7 @@
 /* @refresh reload */
 import { render } from "solid-js/web";
-import { Canvas } from "./lib/Canvas.tsx";
+import Example from "./examples/current.tsx";
 
 const root = document.getElementById("root");
 
-render(() => <Canvas width={512} height={512} />, root!);
+render(() => <Example />, root!);

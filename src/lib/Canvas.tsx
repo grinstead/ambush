@@ -1,24 +1,35 @@
-import { JSXElement } from "solid-js";
+import {
+  JSX,
+  JSXElement,
+  createContext,
+  createMemo,
+  onCleanup,
+} from "solid-js";
 import { Result, failure, success } from "./utils.ts";
 import { GPUCanvasDetails } from "./GPUCanvas.ts";
 import { ShowResult } from "./solid_utils.tsx";
+import { RenderContext, RenderFunc } from "./RenderPart.tsx";
 
-export type CanvasProps = {
-  width: number;
-  height: number;
-  children?: JSXElement;
-};
+export const CanvasContext = createContext(
+  // tricks it into typing the context as always being defined
+  undefined as any as GPUCanvasDetails
+);
+
+export type CanvasProps = JSX.CanvasHTMLAttributes<HTMLCanvasElement>;
 
 export function Canvas(props: CanvasProps) {
-  const canvas = (
-    <canvas width={props.width} height={props.height} />
-  ) as HTMLCanvasElement;
+  // giving canvas a dummy value for children makes sure that Solid does not
+  // attempt to compute the children property, which is good because we have to
+  // wait until WebGPU is initialized before we invoke that property.
+  const canvas = (<canvas {...props} children={null} />) as HTMLCanvasElement;
 
   return (
     <ShowResult
       value={loadGPU(canvas)}
       fallback={canvas} // put the canvas in the dom while it's loading
-      success={(details) => <div>TODO</div>}
+      success={(details) => (
+        <CanvasImpl details={details} children={props.children} />
+      )}
       failure={(e) => <div>{e}</div>} // todo
     />
   );
@@ -43,4 +54,76 @@ export async function loadGPU(
   context.configure({ device, format });
 
   return success({ context, device, canvas, format });
+}
+
+type CanvasImplProps = {
+  details: GPUCanvasDetails;
+  children: JSXElement;
+};
+
+function CanvasImpl(props: CanvasImplProps) {
+  let timerId: number = 0;
+
+  const renderContext = createMemo(() => {
+    let nextPriorityId = 1;
+
+    const onEveryRun: Map<number, RenderFunc> = new Map();
+    const onNextRun: Map<number, RenderFunc> = new Map();
+    const { device } = props.details;
+
+    return {
+      reserveSlot() {
+        const id = nextPriorityId++;
+
+        return (update: null | RenderFunc, everyFrame: boolean = false) => {
+          onNextRun.delete(id);
+          onEveryRun.delete(id);
+
+          if (update) {
+            (everyFrame ? onEveryRun : onNextRun).set(id, update);
+
+            timerId ||= requestAnimationFrame(() => {
+              timerId = 0;
+              renderAll();
+            });
+          }
+        };
+      },
+    };
+
+    function renderAll() {
+      const renders = [...onNextRun.entries(), ...onEveryRun.entries()];
+      onNextRun.clear();
+
+      const encoder = device.createCommandEncoder();
+
+      // sort by priority id
+      renders.sort(([a], [b]) => a - b);
+
+      // render
+      renders.forEach(([_id, render]) => {
+        render(encoder);
+      });
+
+      device.queue.submit([encoder.finish()]);
+    }
+  });
+
+  onCleanup(() => {
+    timerId && cancelAnimationFrame(timerId);
+  });
+
+  return (
+    <>
+      {props.details.canvas}
+      <CanvasContext.Provider value={props.details}>
+        <RenderContext.Provider value={renderContext()}>
+          {
+            // invokes the children, we do not actually render them
+            (props.children, null)
+          }
+        </RenderContext.Provider>
+      </CanvasContext.Provider>
+    </>
+  );
 }

@@ -1,3 +1,5 @@
+import { JSXElement } from "solid-js";
+
 /**
  * In theory, undefined, 0, or false could all be errors (they would be bad
  * error values, but who are we to judge), and so we wrap the error in an object
@@ -48,4 +50,14 @@ export function lerp(
 
 export function randRange(min: number, max: number) {
   return lerp(min, max, Math.random(), false);
+}
+
+/**
+ * Within this library, we often pretend like we are making JSX, but the reality
+ * is that it is an element that uses side-effects to affect the canvas's rendering.
+ * @param x the value to re-type as a JSXElement
+ * @returns the given value, but now retyped to pretend to be a JSXElement
+ */
+export function pretendJSX<T>(x: () => T): JSXElement {
+  return x as any as JSXElement;
 }

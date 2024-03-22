@@ -19,7 +19,7 @@ export type ShowResultProps<T, Error> = {
 };
 
 export function childrenArray<T>(props: {
-  children: AsChildren<T>;
+  children?: AsChildren<T>;
 }): Accessor<Array<T>> {
   const accessor = children(() => props.children as JSXElement);
   return () => accessor.toArray() as any as Array<T>;
