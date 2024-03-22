@@ -1,8 +1,8 @@
 {
-  "name": "ambush",
-  "private": true,
-  "version": "0.0.0",
+  "name": "@grinstead/ambush",
+  "version": "0.0.1",
   "type": "module",
+  "license": "LGPL-2.1-only",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
