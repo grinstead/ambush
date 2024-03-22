@@ -12,6 +12,7 @@
     "solid-js": "^1.8.15"
   },
   "devDependencies": {
+    "@webgpu/types": "^0.1.40",
     "typescript": "^5.2.2",
     "vite": "^5.2.0",
     "vite-plugin-solid": "^2.10.2"
