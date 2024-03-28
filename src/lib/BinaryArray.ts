@@ -50,6 +50,14 @@ export class BinaryArray {
   }
 }
 
+export function asUint8Array(array: BinaryArray): Uint8Array {
+  const { _writeIndex: end, bytes } = array;
+
+  return end
+    ? new Uint8Array(bytes.buffer, bytes.byteOffset, end)
+    : new Uint8Array();
+}
+
 export function bigEndian(
   bytes?: ArrayBuffer | ArrayBufferView,
   overwrite?: boolean
