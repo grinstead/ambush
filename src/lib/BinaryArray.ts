@@ -18,8 +18,9 @@ const START_SIZE = 32;
  * what is currently allocated.
  */
 export class BinaryArray {
-  bytes: Uint8Array;
+  _bytes: Uint8Array;
   _view: undefined | DataView;
+  _readIndex: number = 0;
   _writeIndex: number;
   _allocated: number;
   littleEndian: boolean = false;
@@ -44,17 +45,21 @@ export class BinaryArray {
       asUint8 = new Uint8Array(START_SIZE);
     }
 
-    this.bytes = asUint8;
+    this._bytes = asUint8;
     this._allocated = asUint8.length;
     this._writeIndex = overwrite ? 0 : asUint8.byteLength;
+  }
+
+  get byteLength() {
+    return this._writeIndex - this._readIndex;
   }
 }
 
 export function asUint8Array(array: BinaryArray): Uint8Array {
-  const { _writeIndex: end, bytes } = array;
+  const { _readIndex: start, _writeIndex: end, _bytes: bytes } = array;
 
-  return end
-    ? new Uint8Array(bytes.buffer, bytes.byteOffset, end)
+  return start < end
+    ? new Uint8Array(bytes.buffer, bytes.byteOffset + start, end - start)
     : new Uint8Array();
 }
 
@@ -81,7 +86,7 @@ export function numBytes(array: BinaryArray) {
 function v(array: BinaryArray): DataView {
   let view = array._view;
   if (!view) {
-    const bytes = array.bytes;
+    const bytes = array._bytes;
     array._view = view = new DataView(
       bytes.buffer,
       bytes.byteOffset,
@@ -99,20 +104,34 @@ export function ensureAdditionalBytes(array: BinaryArray, numBytes: number) {
   array._writeIndex = claimBytes(array, numBytes);
 }
 
+export function shiftReadIndex(array: BinaryArray, count: number): number {
+  const start = array._readIndex;
+  const shifted = start + count;
+
+  shifted > array._writeIndex && throwBinaryArrayError(1);
+
+  array._readIndex = shifted;
+  return start;
+}
+
 export function claimBytes(array: BinaryArray, numBytes: number): number {
   let { _writeIndex: index, _allocated: allocated } = array;
 
   if ((array._writeIndex = index + numBytes) > allocated) {
+    const offset = array._readIndex;
+
     // we have to re-allocate the underlying buffer, either double the size, or
     // add some bytes if the bytesize is tiny
-    allocated += Math.max(allocated, START_SIZE, numBytes);
+    allocated = Math.max(2 * (allocated - offset), START_SIZE, numBytes);
 
-    const prev = array.bytes;
+    const prev = array._bytes;
     const data = new Uint8Array(allocated);
-    prev && data.set(prev);
+    data.set(offset ? prev.subarray(offset) : prev);
 
+    array._readIndex = 0;
+    array._writeIndex -= offset;
     array._allocated = allocated;
-    array.bytes = data;
+    array._bytes = data;
     array._view = undefined;
   }
 
@@ -121,7 +140,7 @@ export function claimBytes(array: BinaryArray, numBytes: number): number {
 
 export function appendUint8(array: BinaryArray, value: number) {
   const index = claimBytes(array, 1);
-  array.bytes[index] = value;
+  array._bytes[index] = value;
 }
 
 export function appendUint16(
@@ -149,4 +168,37 @@ export function appendFloat32(
 ) {
   const index = claimBytes(array, NUM_BYTES_FLOAT32);
   v(array).setFloat32(index, value, littleEndian);
+}
+
+export function readUint8(array: BinaryArray): number {
+  const index = shiftReadIndex(array, 1);
+  return array._bytes[index];
+}
+
+export function readUint16(
+  array: BinaryArray,
+  littleEndian: boolean = array.littleEndian
+): number {
+  const index = shiftReadIndex(array, 2);
+  return v(array).getUint16(index, littleEndian);
+}
+
+export function readUint32(
+  array: BinaryArray,
+  littleEndian: boolean = array.littleEndian
+): number {
+  const index = shiftReadIndex(array, 4);
+  return v(array).getUint32(index, littleEndian);
+}
+
+export function readFloat32(
+  array: BinaryArray,
+  littleEndian: boolean = array.littleEndian
+): number {
+  const index = shiftReadIndex(array, 4);
+  return v(array).getFloat32(index, littleEndian);
+}
+
+function throwBinaryArrayError(errorCode: number) {
+  throw new Error(`BinaryArrayError (code ${errorCode})`);
 }
