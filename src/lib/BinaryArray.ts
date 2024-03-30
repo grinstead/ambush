@@ -138,7 +138,7 @@ export function claimBytes(array: BinaryArray, numBytes: number): number {
     data.set(offset ? prev.subarray(offset) : prev);
 
     array._readIndex = 0;
-    array._writeIndex -= offset;
+    array._writeIndex = (index -= offset) + numBytes;
     array._allocated = allocated;
     array._bytes = data;
     array._view = undefined;
