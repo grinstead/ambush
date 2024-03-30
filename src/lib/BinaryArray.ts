@@ -179,6 +179,30 @@ export function appendFloat32(
   v(array).setFloat32(index, value, littleEndian);
 }
 
+export function appendUint8Array(array: BinaryArray, buffer: Uint8Array) {
+  const index = claimBytes(array, buffer.byteLength);
+  array._bytes.set(buffer, index);
+}
+
+let utf8Encoder: undefined | TextEncoder;
+export function appendUtf8(
+  array: BinaryArray,
+  text: string,
+  maxBytes?: number
+): TextEncoderEncodeIntoResult {
+  // an over-allocation, but the text will be guaranteed to fit
+  const length = maxBytes ?? text.length * 3;
+  const index = claimBytes(array, length);
+
+  const bytes = array._bytes.subarray(index, index + length);
+  const result = (utf8Encoder ??= new TextEncoder()).encodeInto(text, bytes);
+
+  // reset the write index to reclaim any potentially unused bytes
+  array._writeIndex = index + result.written;
+
+  return result;
+}
+
 export function readUint8(array: BinaryArray): number {
   const index = shiftReadIndex(array, 1);
   return array._bytes[index];
@@ -211,6 +235,15 @@ export function readFloat32(
 export function readUint8Array(array: BinaryArray, length: number): Uint8Array {
   const index = shiftReadIndex(array, length);
   return array._bytes.subarray(index, index + length);
+}
+
+let utf8Decoder: undefined | TextDecoder;
+export function readUtf8(array: BinaryArray, length: number): string {
+  const index = shiftReadIndex(array, length);
+
+  return (utf8Decoder ??= new TextDecoder()).decode(
+    array._bytes.subarray(index, index + length)
+  );
 }
 
 function throwBinaryArrayError(errorCode: number) {

@@ -4,6 +4,8 @@ import {
   appendUint16,
   appendUint32,
   appendUint8,
+  appendUint8Array,
+  appendUtf8,
   asUint8Array,
   bigEndian,
   littleEndian,
@@ -19,9 +21,10 @@ test("basic appending", () => {
   appendUint32(binary, 1);
   appendUint16(binary, 602);
   appendUint8(binary, 3);
+  appendUint8Array(binary, new Uint8Array([10, 11, 12]));
 
   expect(asUint8Array(binary)).toEqual(
-    new Uint8Array([...[0, 0, 0, 1], ...[2, 90], ...[3]])
+    new Uint8Array([...[0, 0, 0, 1], ...[2, 90], ...[3], ...[10, 11, 12]])
   );
 });
 
@@ -39,6 +42,17 @@ test("writing little endian", () => {
       ...[3].reverse(),
     ])
   );
+});
+
+test("appendUtf8", () => {
+  const binary = littleEndian();
+  const encoder = new TextEncoder();
+
+  appendUtf8(binary, "Hello");
+  appendUtf8(binary, ", World!", 3);
+  appendUtf8(binary, "aldo");
+
+  expect(asUint8Array(binary)).toEqual(encoder.encode("Hello, Waldo"));
 });
 
 test("basic reading", () => {
@@ -84,7 +98,7 @@ test("expanding an array", () => {
     bytes.push(0, 0, 0, i);
   }
 
-  expect(binary.byteLength).toEqual(10 * 4);
+  expect(binary.byteLength).toEqual(bytes.length);
   expect(asUint8Array(binary)).toEqual(new Uint8Array(bytes));
 
   expect(readUint8(binary)).toEqual(0);
