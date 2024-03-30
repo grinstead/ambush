@@ -10,6 +10,7 @@ import {
   readUint16,
   readUint32,
   readUint8,
+  readUint8Array,
 } from "./BinaryArray";
 
 test("basic appending", () => {
@@ -111,4 +112,18 @@ test("copy only what is necessary", () => {
 
   expect(binary._bytes).not.toEqual(original);
   expect(binary._bytes[3]).toEqual(2);
+});
+
+test("read Uint8Array", () => {
+  const original = new Uint8Array([
+    ...[0, 0, 0, 1],
+    ...[0, 0, 0, 2],
+    ...[0, 0, 0, 3],
+  ]);
+  const binary = bigEndian(original);
+  expect(binary._bytes).toEqual(original);
+
+  expect(readUint8Array(binary, 6)).toEqual(original.subarray(0, 6));
+  expect(binary.byteLength).toEqual(6);
+  expect(readUint16(binary)).toEqual(2);
 });

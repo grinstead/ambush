@@ -55,6 +55,15 @@ export class BinaryArray {
   }
 }
 
+/**
+ * A Little-Endian Binary Array
+ */
+export type BinaryArrayLE = BinaryArray & { littleEndian: true };
+/**
+ * A Big-Endian Binary Array
+ */
+export type BinaryArrayBE = BinaryArray & { littleEndian: false };
+
 export function asUint8Array(array: BinaryArray): Uint8Array {
   const { _readIndex: start, _writeIndex: end, _bytes: bytes } = array;
 
@@ -66,15 +75,15 @@ export function asUint8Array(array: BinaryArray): Uint8Array {
 export function bigEndian(
   bytes?: ArrayBuffer | ArrayBufferView,
   overwrite?: boolean
-) {
-  return new BinaryArray(bytes, overwrite);
+): BinaryArrayBE {
+  return new BinaryArray(bytes, overwrite) as BinaryArrayBE;
 }
 
 export function littleEndian(
   bytes?: ArrayBuffer | ArrayBufferView,
   overwrite?: boolean
-) {
-  const array = new BinaryArray(bytes, overwrite);
+): BinaryArrayLE {
+  const array = new BinaryArray(bytes, overwrite) as BinaryArrayLE;
   array.littleEndian = true;
   return array;
 }
@@ -197,6 +206,11 @@ export function readFloat32(
 ): number {
   const index = shiftReadIndex(array, 4);
   return v(array).getFloat32(index, littleEndian);
+}
+
+export function readUint8Array(array: BinaryArray, length: number): Uint8Array {
+  const index = shiftReadIndex(array, length);
+  return array._bytes.subarray(index, index + length);
 }
 
 function throwBinaryArrayError(errorCode: number) {
