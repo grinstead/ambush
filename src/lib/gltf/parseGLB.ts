@@ -19,7 +19,12 @@ const LITTLE_ENDIAN = true;
 const CHUNK_HEADER_JSON = 0x4e4f534a;
 const CHUNK_HEADER_BIN = 0x004e4942;
 
-export function parseGLB(container: BinaryArray) {
+export type GLBFile = {
+  asset: GLTFAsset;
+  bin?: Uint8Array;
+};
+
+export function parseGLB(container: BinaryArray): GLBFile {
   const binary = claimGLBContents(container);
 
   const jsonLength = readUint32(binary);

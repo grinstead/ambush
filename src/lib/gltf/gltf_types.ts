@@ -328,6 +328,7 @@ export type GLTFAccessor = {
    * properties are optional.
    */
   max?: Array<number>;
+  min?: Array<number>;
 };
 
 export type GLTFScene = {
@@ -390,10 +391,9 @@ export type GLTFTransRotScale = {
 
 // export type GLTFStandardAttributes;
 
-export type GLTFMeshPrimitive<Attributes extends string = string> = Record<
-  Attributes,
-  number
->;
+export type GLTFMeshPrimitive<Attributes extends string = string> = {
+  attributes: Record<Attributes, number>;
+};
 
 export type GLTFMesh = {
   primitives?: Array<GLTFMeshPrimitive>;
