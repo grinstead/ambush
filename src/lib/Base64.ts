@@ -1,4 +1,10 @@
-import { BinaryArray, readUint8Array, shiftReadIndex } from "./BinaryArray.ts";
+import {
+  BinaryArray,
+  appendAscii,
+  littleEndian,
+  readUint8Array,
+  shiftReadIndex,
+} from "./BinaryArray.ts";
 
 const CHAR_PAD = 61; // '='
 
@@ -77,4 +83,10 @@ function decodeByte(byte: number) {
     : byte <= 90 /* 'Z' */
     ? byte - 65 // 25 - ('Z' - byte)
     : byte - 71; // 51 - ('z' - byte)
+}
+
+export function parseBase64(base64: string) {
+  const bin = littleEndian();
+  appendAscii(bin, base64);
+  return readBase64(bin);
 }
