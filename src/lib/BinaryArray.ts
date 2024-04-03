@@ -185,10 +185,19 @@ export function appendUint8Array(array: BinaryArray, buffer: Uint8Array) {
 }
 
 let utf8Encoder: undefined | TextEncoder;
+
+export function appendAscii(
+  array: BinaryArray,
+  text: string,
+  maxBytes: number = text.length
+) {
+  return appendUtf8(array, text, maxBytes);
+}
+
 export function appendUtf8(
   array: BinaryArray,
   text: string,
-  maxBytes?: number
+  maxBytes: number = text.length * 3
 ): TextEncoderEncodeIntoResult {
   // an over-allocation, but the text will be guaranteed to fit
   const length = maxBytes ?? text.length * 3;
@@ -248,4 +257,23 @@ export function readUtf8(array: BinaryArray, length: number): string {
 
 function throwBinaryArrayError(errorCode: number) {
   throw new Error(`BinaryArrayError (code ${errorCode})`);
+}
+
+export function buildBinary(
+  builder: (bin: BinaryArrayBE) => unknown,
+  binary: BinaryArrayBE
+): BinaryArrayBE;
+export function buildBinary(
+  builder: (bin: BinaryArrayLE) => unknown,
+  binary: BinaryArrayLE
+): BinaryArrayLE;
+export function buildBinary(
+  builder: (bin: BinaryArrayLE) => unknown
+): BinaryArrayLE;
+export function buildBinary(
+  builder: (bin: any) => unknown,
+  binary: BinaryArrayBE | BinaryArrayLE = littleEndian()
+): any {
+  builder(binary);
+  return binary;
 }
