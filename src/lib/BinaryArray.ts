@@ -179,6 +179,16 @@ export function appendFloat32(
   v(array).setFloat32(index, value, littleEndian);
 }
 
+export function appendBuffer(
+  array: BinaryArray,
+  buffer: ArrayBuffer,
+  byteOffset?: number,
+  length?: number
+) {
+  const index = claimBytes(array, buffer.byteLength);
+  array._bytes.set(new Uint8Array(buffer, byteOffset, length), index);
+}
+
 export function appendUint8Array(array: BinaryArray, buffer: Uint8Array) {
   const index = claimBytes(array, buffer.byteLength);
   array._bytes.set(buffer, index);

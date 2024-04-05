@@ -5,6 +5,7 @@ import { BindGroup, RenderShader } from "../lib/Shader.tsx";
 import { gltfFromFile } from "../lib/gltf/GLTF.ts";
 import { GLTFAsset } from "../lib/gltf/gltf_types.ts";
 import { UniformBuffer } from "../lib/solid/UniformBuffer.tsx";
+import { appendBuffer, littleEndian } from "../lib/BinaryArray.ts";
 
 export default function App() {
   console.log("Rendering App");
@@ -19,27 +20,11 @@ export default function App() {
 // https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/TriangleWithoutIndices/glTF-Embedded/TriangleWithoutIndices.gltf
 const TRIANGLE_WITHOUT_INDICES: GLTFAsset = {
   scene: 0,
-  scenes: [
-    {
-      nodes: [0],
-    },
-  ],
-
-  nodes: [
-    {
-      mesh: 0,
-    },
-  ],
-
+  scenes: [{ nodes: [0] }],
+  nodes: [{ mesh: 0 }],
   meshes: [
     {
-      primitives: [
-        {
-          attributes: {
-            POSITION: 0,
-          },
-        },
-      ],
+      primitives: [{ attributes: { POSITION: 0 } }],
     },
   ],
 
@@ -79,8 +64,16 @@ export function MyTest() {
 
   const { device } = useContext(CanvasContext);
 
-  const MyTestShaderCode = `
+  const vertexBuffer = device.createBuffer({
+    label: "Vertex Buffer",
+    size: gltf.meta.buffers![0].byteLength,
+    usage: GPUBufferUsage.VERTEX,
+  });
+  const writable = littleEndian(vertexBuffer.getMappedRange(), true);
+  appendBuffer(writable, gltf.bin!);
+  vertexBuffer.unmap();
 
+  const MyTestShaderCode = `
 struct VertexOutput {
   @builtin(position) position: vec4f,
   @location(0) fragUV: vec2f,
@@ -116,7 +109,10 @@ fn fragment_main(@location(0) fragUV: vec2f) -> @location(0) vec4f {
       code={MyTestShaderCode}
       vertexMain="vertex_main"
       fragmentMain="fragment_main"
-      draw={(run) => run.draw(4)}
+      draw={(run) => {
+        run.setVertexBuffer();
+        run.draw();
+      }}
     >
       <BindGroup>
         <UniformBuffer label="triangle_data" bytes={gltf.bin!} />
