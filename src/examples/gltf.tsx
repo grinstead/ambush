@@ -3,9 +3,13 @@ import { parseBase64 } from "../lib/Base64.ts";
 import { Canvas, CanvasContext } from "../lib/Canvas.tsx";
 import { BindGroup, RenderShader } from "../lib/Shader.tsx";
 import { gltfFromFile } from "../lib/gltf/GLTF.ts";
-import { GLTFAsset } from "../lib/gltf/gltf_types.ts";
+import { GLTFAsset, GLTF_ACCESSOR_LENGTH } from "../lib/gltf/gltf_types.ts";
 import { UniformBuffer } from "../lib/solid/UniformBuffer.tsx";
-import { appendBuffer, littleEndian } from "../lib/BinaryArray.ts";
+import {
+  NUM_BYTES_FLOAT32,
+  appendBuffer,
+  littleEndian,
+} from "../lib/BinaryArray.ts";
 
 export default function App() {
   console.log("Rendering App");
@@ -67,11 +71,10 @@ export function MyTest() {
   const vertexBuffer = device.createBuffer({
     label: "Vertex Buffer",
     size: gltf.meta.buffers![0].byteLength,
-    usage: GPUBufferUsage.VERTEX,
+    usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
   });
-  const writable = littleEndian(vertexBuffer.getMappedRange(), true);
-  appendBuffer(writable, gltf.bin!);
-  vertexBuffer.unmap();
+
+  device.queue.writeBuffer(vertexBuffer, 0, gltf.bin!);
 
   const MyTestShaderCode = `
 struct VertexOutput {
@@ -80,20 +83,8 @@ struct VertexOutput {
 }
 
 @vertex
-fn vertex_main(@builtin(vertex_index) index: u32) -> VertexOutput {
-  const fragPoints = array(
-    vec2f(0, 0),
-    vec2f(1, 0),
-    vec2f(0, 1),
-    vec2f(1, 1),
-  );
-
-  let uv = fragPoints[index];
-
-  return VertexOutput(
-    vec4f(2 * uv - 1, 0, 1),
-    uv,
-  );
+fn vertex_main(@location(0) position: vec3f) -> VertexOutput {
+  return VertexOutput(vec4f(position, 1.), saturate(position.xy));
 }
 
 @fragment
@@ -109,14 +100,22 @@ fn fragment_main(@location(0) fragUV: vec2f) -> @location(0) vec4f {
       code={MyTestShaderCode}
       vertexMain="vertex_main"
       fragmentMain="fragment_main"
+      buffers={[
+        {
+          arrayStride: GLTF_ACCESSOR_LENGTH.VEC3 * NUM_BYTES_FLOAT32,
+          attributes: [
+            {
+              shaderLocation: 0,
+              offset: 0,
+              format: "float32x3",
+            },
+          ],
+        },
+      ]}
       draw={(run) => {
-        run.setVertexBuffer();
-        run.draw();
+        run.setVertexBuffer(0, vertexBuffer);
+        run.draw(gltf.meta.accessors![0].count);
       }}
-    >
-      <BindGroup>
-        <UniformBuffer label="triangle_data" bytes={gltf.bin!} />
-      </BindGroup>
-    </RenderShader>
+    ></RenderShader>
   );
 }

@@ -10,6 +10,7 @@ export type RenderShaderProps = {
   code: string;
   vertexMain: string;
   fragmentMain: string;
+  buffers?: Array<GPUVertexBufferLayout>;
   children?: AsChildren<BindGroupDefinition | null>;
   draw: number | ((encoder: GPURenderPassEncoder) => void);
   colorAttachments?: Iterable<GPURenderPassColorAttachment | null>;
@@ -51,6 +52,7 @@ export function RenderShader(props: RenderShaderProps) {
       vertex: {
         module: getShader(),
         entryPoint: props.vertexMain,
+        buffers: props.buffers,
       },
       fragment: {
         module: getShader(),

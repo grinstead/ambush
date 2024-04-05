@@ -392,7 +392,7 @@ export type GLTFTransRotScale = {
 // export type GLTFStandardAttributes;
 
 export type GLTFMeshPrimitive<Attributes extends string = string> = {
-  attributes: Record<Attributes, number>;
+  attributes: Record<Attributes, GLTFIndex<"accessors">>;
 };
 
 export type GLTFMesh = {
