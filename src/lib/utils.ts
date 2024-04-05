@@ -34,6 +34,10 @@ export function nonnullish<T>(given: Array<T | null | undefined>): Array<T> {
   return given.filter((x) => x != null) as Array<T>;
 }
 
+export function throwError(message: string): any {
+  throw new Error(message);
+}
+
 export function roundUpToMultiple(value: number, base: number) {
   return base * Math.ceil(value / base);
 }

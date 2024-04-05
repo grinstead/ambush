@@ -4,12 +4,7 @@ import { Canvas, CanvasContext } from "../lib/Canvas.tsx";
 import { BindGroup, RenderShader } from "../lib/Shader.tsx";
 import { gltfFromFile } from "../lib/gltf/GLTF.ts";
 import { GLTFAsset, GLTF_ACCESSOR_LENGTH } from "../lib/gltf/gltf_types.ts";
-import { UniformBuffer } from "../lib/solid/UniformBuffer.tsx";
-import {
-  NUM_BYTES_FLOAT32,
-  appendBuffer,
-  littleEndian,
-} from "../lib/BinaryArray.ts";
+import { NUM_BYTES_FLOAT32 } from "../lib/BinaryArray.ts";
 
 export default function App() {
   console.log("Rendering App");
@@ -61,20 +56,23 @@ const TRIANGLE_WITHOUT_INDICES: GLTFAsset = {
 export function MyTest() {
   console.log("Rendering MyTest");
 
-  const gltf = gltfFromFile({
+  const { device } = useContext(CanvasContext);
+
+  const model = gltfFromFile({
     asset: TRIANGLE_WITHOUT_INDICES,
     bin: parseBase64("AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAA"),
   });
 
-  const { device } = useContext(CanvasContext);
+  const gltf = model.attachTo(device);
 
   const vertexBuffer = device.createBuffer({
     label: "Vertex Buffer",
-    size: gltf.meta.buffers![0].byteLength,
+    size: model.buffer(model.bufferView(model.accessor(0).bufferView!).buffer)
+      .byteLength,
     usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
   });
 
-  device.queue.writeBuffer(vertexBuffer, 0, gltf.bin!);
+  device.queue.writeBuffer(vertexBuffer, 0, model.bin!);
 
   const MyTestShaderCode = `
 struct VertexOutput {
@@ -114,7 +112,7 @@ fn fragment_main(@location(0) fragUV: vec2f) -> @location(0) vec4f {
       ]}
       draw={(run) => {
         run.setVertexBuffer(0, vertexBuffer);
-        run.draw(gltf.meta.accessors![0].count);
+        run.draw(model.accessor(0).count);
       }}
     ></RenderShader>
   );
