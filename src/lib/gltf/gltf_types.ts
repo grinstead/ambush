@@ -88,6 +88,11 @@ export type GLTFIndex<Prop extends keyof GLTFAsset> =
   | number
   | { [GLTFIndexInto]: Prop };
 
+export type GLTFDescriptor = {
+  /** The user-defined name of this object. */
+  name?: string;
+};
+
 /**
  * A buffer is arbitrary data stored as a binary blob. The buffer MAY contain
  * any combination of geometry, animation, skins, and images.
@@ -107,7 +112,7 @@ export type GLTFIndex<Prop extends keyof GLTFAsset> =
  * geometry indices, sparse accessor data, animation inputs and outputs, inverse
  * bind matrices) MUST use little endian byte order.
  */
-export type GLTFBuffer = {
+export type GLTFBuffer = GLTFDescriptor & {
   /**
    * The byteLength property specifies the size of the buffer file.
    *
@@ -168,10 +173,7 @@ export type GLTFBuffer = {
  * the raw data for retrieval from the file. Objects within the glTF asset
  * (meshes, skins, animations) access buffers or buffer views via accessors.
  */
-export type GLTFBufferView = {
-  /** The user-defined name of this object. */
-  name?: string;
-
+export type GLTFBufferView = GLTFDescriptor & {
   buffer: GLTFIndex<"buffers">;
   /**
    * The length of the bufferView in bytes.

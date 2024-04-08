@@ -2,7 +2,7 @@ import { useContext } from "solid-js";
 import { parseBase64 } from "../lib/Base64.ts";
 import { Canvas, CanvasContext } from "../lib/Canvas.tsx";
 import { BindGroup, RenderShader } from "../lib/Shader.tsx";
-import { gltfFromFile } from "../lib/gltf/GLTF.ts";
+import { gltfFromFile, prepareGLTF } from "../lib/gltf/GLTF.ts";
 import { GLTFAsset, GLTF_ACCESSOR_LENGTH } from "../lib/gltf/gltf_types.ts";
 import { NUM_BYTES_FLOAT32 } from "../lib/BinaryArray.ts";
 
@@ -65,14 +65,7 @@ export function MyTest() {
 
   const gltf = model.attachTo(device);
 
-  const vertexBuffer = device.createBuffer({
-    label: "Vertex Buffer",
-    size: model.buffer(model.bufferView(model.accessor(0).bufferView!).buffer)
-      .byteLength,
-    usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-  });
-
-  device.queue.writeBuffer(vertexBuffer, 0, model.bin!);
+  prepareGLTF(gltf);
 
   const MyTestShaderCode = `
 struct VertexOutput {
@@ -111,7 +104,7 @@ fn fragment_main(@location(0) fragUV: vec2f) -> @location(0) vec4f {
         },
       ]}
       draw={(run) => {
-        run.setVertexBuffer(0, vertexBuffer);
+        run.setVertexBuffer(0, gltf._buffers![0]);
         run.draw(model.accessor(0).count);
       }}
     ></RenderShader>

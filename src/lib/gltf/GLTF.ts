@@ -62,7 +62,53 @@ export class GLTFModel {
 }
 
 export class GLTF {
-  constructor(readonly device: GPUDevice, readonly model: GLTFModel) {}
+  _buffers: undefined | Array<GPUBuffer>;
+
+  constructor(readonly device: GPUDevice, readonly model: GLTFModel) {
+    // if no buffers, declare ourselves done
+    this._buffers = model.meta.buffers?.length ? undefined : [];
+  }
+}
+
+export function prepareGLTF(gltf: GLTF): Promise<void> {
+  if (!gltf._buffers) {
+    const {
+      device,
+      model: {
+        meta: { buffers },
+        bin,
+      },
+    } = gltf;
+
+    if (!buffers) return Promise.resolve();
+
+    gltf._buffers = buffers.map((model) => {
+      const size = model.byteLength;
+
+      // todo: figure out proper usage
+      const buffer = device.createBuffer({
+        label: model.name,
+        size,
+        usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+      });
+
+      if (!model.uri) {
+        device.queue.writeBuffer(
+          buffer,
+          0,
+          bin ?? throwError(`No binary included in GLTF`),
+          0,
+          size
+        );
+      } else {
+        throw new Error(`TODO: load buffer from uri`);
+      }
+
+      return buffer;
+    });
+  }
+
+  return Promise.resolve();
 }
 
 export function gltfFromFile(file: GLBFile) {
