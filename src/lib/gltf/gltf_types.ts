@@ -391,10 +391,25 @@ export type GLTFTransRotScale = {
   rotation?: GLTFQuarternion;
 };
 
-// export type GLTFStandardAttributes;
+export type GLTFApplicationSpecificAttribute = `_${string}`;
 
-export type GLTFMeshPrimitive<Attributes extends string = string> = {
-  attributes: Record<Attributes, GLTFIndex<"accessors">>;
+export type GLTFStandardAttribute =
+  | "POSITION"
+  | "NORMAL"
+  | "TANGENT"
+  | `TEXCOORD_${number}`
+  | `COLOR_${number}`
+  | `JOINTS_${number}`
+  | `WEIGHTS_${number}`;
+
+export type GLTFAttribute =
+  | GLTFStandardAttribute
+  | GLTFApplicationSpecificAttribute;
+
+export type GLTFMeshPrimitive<
+  Attribute extends GLTFAttribute = GLTFStandardAttribute
+> = {
+  attributes: { [A in Attribute]?: GLTFIndex<"accessors"> };
 };
 
 export type GLTFMesh = {

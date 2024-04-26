@@ -1,7 +1,8 @@
-import { throwError } from "../utils.ts";
+import { read, throwError } from "../utils.ts";
 import {
   GLTFAccessor,
   GLTFAsset,
+  GLTFAttribute,
   GLTFBuffer,
   GLTFBufferView,
   GLTFIndex,
@@ -109,6 +110,43 @@ export function prepareGLTF(gltf: GLTF): Promise<void> {
   }
 
   return Promise.resolve();
+}
+
+type ShaderIndex = number;
+
+/**
+ *
+ * @param gltf The data to build from
+ * @param attributes The declared values in the shader
+ * @param meshIndex Which mesh to draw from (defaults to 0)
+ * @returns A value that can be passed as the buffers parameter to a render pipeline
+ */
+export function getVertexBuffers(
+  gltf: GLTF,
+  attributes: { [Attr in GLTFAttribute]?: ShaderIndex },
+  meshIndex: GLTFIndex<"meshes"> = 0
+): GPUVertexBufferLayout[] {
+  const results: GPUVertexBufferLayout[] = [];
+
+  const { model } = gltf;
+
+  const mesh = model.mesh(meshIndex);
+
+  // todo: understand why there could be multiple mesh primitives
+  const accessors = mesh.primitives?.[0].attributes;
+  if (!accessors) return results;
+
+  const buffers = new Map<GLTFAccessor, GPUVertexBufferLayout>();
+
+  for (const attr in accessors) {
+    const loc = read(attributes, attr as GLTFAttribute);
+    if (loc == null) continue;
+
+    const accModel = model.accessor(accessors[attr as any]!);
+    console.log(accModel);
+  }
+
+  return results;
 }
 
 export function gltfFromFile(file: GLBFile) {

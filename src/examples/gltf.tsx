@@ -2,7 +2,11 @@ import { useContext } from "solid-js";
 import { parseBase64 } from "../lib/Base64.ts";
 import { Canvas, CanvasContext } from "../lib/Canvas.tsx";
 import { BindGroup, RenderShader } from "../lib/Shader.tsx";
-import { gltfFromFile, prepareGLTF } from "../lib/gltf/GLTF.ts";
+import {
+  getVertexBuffers,
+  gltfFromFile,
+  prepareGLTF,
+} from "../lib/gltf/GLTF.ts";
 import { GLTFAsset, GLTF_ACCESSOR_LENGTH } from "../lib/gltf/gltf_types.ts";
 import { NUM_BYTES_FLOAT32 } from "../lib/BinaryArray.ts";
 
@@ -67,6 +71,8 @@ export function MyTest() {
 
   prepareGLTF(gltf);
 
+  getVertexBuffers(gltf, { POSITION: 0 });
+
   const MyTestShaderCode = `
 struct VertexOutput {
   @builtin(position) position: vec4f,
@@ -84,6 +90,30 @@ fn fragment_main(@location(0) fragUV: vec2f) -> @location(0) vec4f {
 }
   
   `;
+
+  /*
+const x = {
+  buffers: [
+    {
+      arrayStride: cubeVertexSize,
+      attributes: [
+        {
+          // position
+          shaderLocation: 0,
+          offset: cubePositionOffset,
+          format: "float32x4",
+        },
+        {
+          // uv
+          shaderLocation: 1,
+          offset: cubeUVOffset,
+          format: "float32x2",
+        },
+      ],
+    },
+  ],
+};
+  */
 
   return (
     <RenderShader

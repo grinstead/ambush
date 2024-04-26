@@ -42,6 +42,18 @@ export function roundUpToMultiple(value: number, base: number) {
   return base * Math.ceil(value / base);
 }
 
+export function read<T, K extends string>(record: Record<K, T>, key: K): T;
+export function read<T, K extends string>(
+  record: { [X in K]?: T },
+  key: K
+): T | undefined;
+export function read<T>(
+  record: Record<string, undefined | T>,
+  key: string
+): T | undefined {
+  return record.hasOwnProperty(key) ? record[key] : undefined;
+}
+
 export function lerp(
   a: number,
   b: number,
