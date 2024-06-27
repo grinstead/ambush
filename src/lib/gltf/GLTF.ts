@@ -136,7 +136,7 @@ export function getVertexBuffers(
   const accessors = mesh.primitives?.[0].attributes;
   if (!accessors) return results;
 
-  const buffers = new Map<GLTFAccessor, GPUVertexBufferLayout>();
+  // const buffers = new Map<GLTFAccessor, GPUVertexBufferLayout>();
 
   for (const attr in accessors) {
     const loc = read(attributes, attr as GLTFAttribute);

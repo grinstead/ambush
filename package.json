@@ -1,8 +1,20 @@
 {
   "name": "@grinstead/ambush",
-  "version": "0.0.1",
-  "type": "module",
+  "version": "0.0.2",
   "license": "LGPL-2.1-only",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/ambush.umd.cjs",
+  "module": "./dist/ambush.js",
+  "types": "./dist/ambush.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/ambush.js",
+      "require": "./dist/ambush.umd.cjs"
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -15,6 +27,7 @@
     "@webgpu/types": "^0.1.40",
     "typescript": "^5.2.2",
     "vite": "^5.2.0",
+    "vite-plugin-dts": "^3.9.1",
     "vite-plugin-solid": "^2.10.2"
   }
 }

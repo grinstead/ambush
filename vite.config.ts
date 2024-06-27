@@ -1,8 +1,9 @@
 import { defineConfig } from "vite";
 import solid from "vite-plugin-solid";
+import dts from "vite-plugin-dts";
 
 export default defineConfig({
-  plugins: [solid()],
+  plugins: [solid(), dts({ rollupTypes: true })],
 
   build: {
     lib: {
@@ -11,7 +12,7 @@ export default defineConfig({
       fileName: "ambush",
     },
     rollupOptions: {
-      external: ["solid"],
+      external: ["solid-js"],
     },
   },
 });

@@ -5,7 +5,6 @@ import {
   littleEndian,
   readUtf8,
   readUint32,
-  readUint8,
   readUint8Array,
 } from "../BinaryArray.ts";
 import { GLTFAsset } from "./gltf_types.ts";

@@ -2,7 +2,6 @@ import {
   BinaryArray,
   appendAscii,
   littleEndian,
-  readUint8Array,
   shiftReadIndex,
 } from "./BinaryArray.ts";
 

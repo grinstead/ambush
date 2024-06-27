@@ -1,7 +1,7 @@
 import { useContext } from "solid-js";
 import { parseBase64 } from "../lib/Base64.ts";
 import { Canvas, CanvasContext } from "../lib/Canvas.tsx";
-import { BindGroup, RenderShader } from "../lib/Shader.tsx";
+import { RenderShader } from "../lib/Shader.tsx";
 import {
   getVertexBuffers,
   gltfFromFile,

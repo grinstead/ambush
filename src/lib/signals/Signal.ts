@@ -12,5 +12,3 @@ export class Signal<T> {
 export interface Process<Result, InterimResult> extends Signal<InterimResult> {
   result: Signal<Result>;
 }
-
-export function isDefined(signal: Signal<any>): boolean {}
