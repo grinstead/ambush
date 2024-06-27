@@ -1,7 +1,13 @@
 {
   "name": "@grinstead/ambush",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": "LGPL-2.1-only",
+  "homepage": "https://github.com/grinstead/ambush#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/grinstead/ambush.git"
+  },
+  "bugs": "https://github.com/grinstead/ambush/issues",
   "type": "module",
   "files": [
     "dist"
@@ -18,6 +24,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "prepublishOnly": "bun run build",
     "preview": "vite preview"
   },
   "dependencies": {

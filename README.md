@@ -1,28 +1,23 @@
-## Usage
+# Ambush Engine
+
+## 🚧 Very New and Incomplete 🚧
+
+**Warning: This project is in its early stages of development and is not yet ready for public use.** The API and functionality are still being developed, and there may be breaking changes as the project evolves. We appreciate your interest and encourage you to follow the project's progress. Contributions and feedback are welcome as we work to flesh out the engine over time.
+
+## About
+
+Ambush Engine is a new game engine built using [SolidJS](https://www.solidjs.com/) and designed to leverage the power of WebGPU. Our goal is to create a performant, modern, tiny, and flexible engine for creating games and simulations.
+
+## Installation
 
 ```bash
-$ npm install # or pnpm install or yarn install
+npm install @grinstead/ambush
 ```
 
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
+## API
 
-## Available Scripts
+(todo)
 
-In the project directory, you can run:
+## Contributing
 
-### `npm run dev`
-
-Runs the app in the development mode.<br>
-Open [http://localhost:5173](http://localhost:5173) to view it in the browser.
-
-### `npm run build`
-
-Builds the app for production to the `dist` folder.<br>
-It correctly bundles Solid in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
-
-## Deployment
-
-Learn more about deploying your application with the [documentations](https://vitejs.dev/guide/static-deploy.html)
+We welcome contributions from the community. Please feel free to submit issues or pull requests.
