@@ -13,7 +13,7 @@ export type UniformMatrix4x4Props = {
   rowMajor?: boolean;
   /** The matrix elements in the order specified. */
   // prettier-ignore
-  children: [
+  children: Array<number> | [
     number, string, number, string, number, string, number,
     number, string, number, string, number, string, number,
     number, string, number, string, number, string, number,
