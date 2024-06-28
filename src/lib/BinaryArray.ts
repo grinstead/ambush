@@ -261,6 +261,22 @@ export function appendUint32(
 }
 
 /**
+ * Append a Int32 value to the BinaryArray.
+ *
+ * @param array The BinaryArray to modify
+ * @param value The value to append
+ * @param littleEndian Whether to use little-endian byte order
+ */
+export function appendInt32(
+  array: BinaryArray,
+  value: number,
+  littleEndian: boolean = array.littleEndian
+) {
+  const index = claimBytes(array, NUM_BYTES_INT32);
+  v(array).setInt32(index, value, littleEndian);
+}
+
+/**
  * Append a Float32 value to the BinaryArray.
  *
  * @param array The BinaryArray to modify
