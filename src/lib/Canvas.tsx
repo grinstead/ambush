@@ -3,7 +3,9 @@ import {
   JSXElement,
   createContext,
   createMemo,
+  createSignal,
   onCleanup,
+  onMount,
 } from "solid-js";
 import { Result, failure, success } from "./utils.ts";
 import { GPUCanvasDetails } from "./GPUCanvas.ts";
@@ -18,10 +20,32 @@ export const CanvasContext = createContext(
 export type CanvasProps = JSX.CanvasHTMLAttributes<HTMLCanvasElement>;
 
 export function Canvas(props: CanvasProps) {
-  // giving canvas a dummy value for children makes sure that Solid does not
-  // attempt to compute the children property, which is good because we have to
-  // wait until WebGPU is initialized before we invoke that property.
-  const canvas = (<canvas {...props} children={null} />) as HTMLCanvasElement;
+  const [computed, setComputed] = createSignal<{
+    width: number;
+    height: number;
+  }>();
+
+  const canvas = (
+    <canvas
+      {...props}
+      width={props.width ?? computed()?.width}
+      height={props.height ?? computed()?.height}
+      // giving canvas a dummy value for children makes sure that Solid does not
+      // attempt to compute the children property, which is good because we have
+      // to wait until WebGPU is initialized before we invoke that property.
+      children={null}
+    />
+  ) as HTMLCanvasElement;
+
+  onMount(() => {
+    const computedStyle = getComputedStyle(canvas);
+    const ratio = window.devicePixelRatio ?? 1;
+
+    setComputed({
+      width: ratio * parseInt(computedStyle.getPropertyValue("width"), 10),
+      height: ratio * parseInt(computedStyle.getPropertyValue("height"), 10),
+    });
+  });
 
   return (
     <ShowResult
