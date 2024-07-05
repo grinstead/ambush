@@ -139,3 +139,7 @@ export function maybeNewVec(
 ): Vec {
   return x === prev.x && y === prev.y && z === prev.z ? prev : vec(x, y, z);
 }
+
+export function xyzArray(vec: Vec): [number, number, number] {
+  return [vec.x, vec.y, vec.z];
+}

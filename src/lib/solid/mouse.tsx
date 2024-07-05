@@ -1,5 +1,5 @@
 import { Accessor, batch, createSignal } from "solid-js";
-import { VEC_ZERO, Vec, maybeNewVec } from "../../Vec.ts";
+import { VEC_ZERO, Vec, maybeNewVec } from "../basic/Vec.ts";
 
 /**
  * Type representing the accessors for mouse tracking state.
