@@ -28,6 +28,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@grinstead/webgpu": "^0.1.0",
     "solid-js": "^1.8.15"
   },
   "devDependencies": {

@@ -12,7 +12,7 @@ export default defineConfig({
       fileName: "ambush",
     },
     rollupOptions: {
-      external: ["solid-js"],
+      external: ["solid-js", "@grinstead/webgpu"],
     },
   },
 });
