@@ -1,3 +1,7 @@
+import {
+  SimpleEventListener,
+  SingleEventTarget,
+} from "./other/SimpleEventTarget.ts";
 import { lerp } from "./utils.ts";
 
 const DEFAULT_FPS_SMOOTHING = 0.8;
@@ -20,7 +24,11 @@ export type FrameTimerConfig = {
   maxFrameMs?: number;
 };
 
-export class FrameTimer {
+export class BaseFrameTimer implements FrameTimer {
+  readonly parent: BaseFrameTimer = this;
+  readonly timeOffset: number = 0;
+  readonly frameOffset: number = 0;
+
   /**
    * The tracked time in milliseconds, starting from 0 for when the game began
    */
@@ -44,13 +52,13 @@ export class FrameTimer {
    * Call to start a frame, if the timer is paused it will automatically unpause.
    */
   markFrame() {
-    this.frame++;
-
     const { avgMs, config } = this;
     const now = Date.now();
 
     let ms;
-    if (this.paused) {
+    if (!this.frame++) {
+      ms = 0;
+    } else if (this.paused) {
       this.paused = false;
       ms = avgMs;
     } else {
@@ -68,11 +76,57 @@ export class FrameTimer {
       }
     }
 
-    this.time += ms;
+    this.time += ms / 1000;
     this.lastTs = now;
+
+    this.subs?.dispatch(undefined);
   }
 
   get fps() {
     return Math.round(1000 / this.avgMs);
+  }
+
+  subtimer(): FrameTimer {
+    return new FrameTimer(this);
+  }
+
+  // event listening
+
+  private subs?: SingleEventTarget;
+
+  subscribeFrameTime(listener: SimpleEventListener) {
+    return (this.subs ??= new SingleEventTarget("frametime")).subscribe(
+      listener
+    );
+  }
+}
+
+export class FrameTimer {
+  readonly timeOffset: number;
+  readonly frameOffset: number;
+
+  constructor(readonly parent: BaseFrameTimer) {
+    this.timeOffset = parent.time;
+    this.frameOffset = parent.frame;
+  }
+
+  subscribeFrameTime(listener: SimpleEventListener) {
+    return this.parent.subscribeFrameTime(listener);
+  }
+
+  subtimer(): FrameTimer {
+    return new FrameTimer(this.parent);
+  }
+
+  get time(): number {
+    return this.parent.time - this.timeOffset;
+  }
+
+  get frame(): number {
+    return this.parent.frame - this.frameOffset;
+  }
+
+  get fps() {
+    return this.parent.fps;
   }
 }
