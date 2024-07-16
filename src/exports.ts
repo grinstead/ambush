@@ -10,3 +10,4 @@ export * from "./lib/basic/color.ts";
 export * from "@grinstead/webgpu";
 export * from "./lib/solid/solid_timing.ts";
 export * from "./lib/other/Docket.ts";
+export * from "./lib/solid/GameLoop.tsx";
