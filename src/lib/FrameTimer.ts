@@ -29,11 +29,9 @@ export class BaseFrameTimer implements FrameTimer {
   readonly timeOffset: number = 0;
   readonly frameOffset: number = 0;
 
-  /**
-   * The tracked time in milliseconds, starting from 0 for when the game began
-   */
   time: number = 0;
-  /** The most recent frame */
+  deltaTime: number = 0;
+
   frame: number = 0;
   /** Whether the timer is paused */
   paused: boolean = true;
@@ -50,8 +48,9 @@ export class BaseFrameTimer implements FrameTimer {
 
   /**
    * Call to start a frame, if the timer is paused it will automatically unpause.
+   * @returns The time since the last frame
    */
-  markFrame() {
+  markFrame(): number {
     const { avgMs, config } = this;
     const now = Date.now();
 
@@ -76,10 +75,15 @@ export class BaseFrameTimer implements FrameTimer {
       }
     }
 
-    this.time += ms / 1000;
+    const deltaTime = ms / 1000;
+
+    this.time += deltaTime;
+    this.deltaTime = deltaTime;
     this.lastTs = now;
 
     this.subs?.dispatch(undefined);
+
+    return deltaTime;
   }
 
   get fps() {
@@ -118,10 +122,22 @@ export class FrameTimer {
     return new FrameTimer(this.parent);
   }
 
+  /**
+   * The tracked time in milliseconds, starting from 0 for when the game began
+   */
   get time(): number {
     return this.parent.time - this.timeOffset;
   }
 
+  /**
+   * The time between the current frame and the previous frame
+   */
+  get deltaTime(): number {
+    const { parent } = this;
+    return parent.frame === parent.frameOffset ? 0 : parent.deltaTime;
+  }
+
+  /** The most recent frame */
   get frame(): number {
     return this.parent.frame - this.frameOffset;
   }
