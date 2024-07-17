@@ -4,14 +4,13 @@ import { VEC_ZERO, Vec, maybeNewVec } from "../basic/Vec.ts";
 /**
  * Type representing the accessors for mouse tracking state.
  * Includes accessors for mouse position, button states, and tracking status.
- *
- * @property pos - Accessor for the mouse position, which is a vector.
- * @property buttons - Accessor for the mouse button states, represented as a bitmask, see [MouseEvent.buttons](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/buttons) for more details.
- * @property tracked - Accessor for the tracking status, indicating whether the mouse is being tracked.
  */
 export type MouseAccessors = {
+  /** Accessor for the mouse position, which is a vector. */
   pos: Accessor<Vec>;
+  /**  Accessor for the mouse button states, represented as a bitmask, see [MouseEvent.buttons](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/buttons) for more details. */
   buttons: Accessor<number>;
+  /** Accessor for the tracking status, indicating whether the mouse is being tracked. */
   tracked: Accessor<boolean>;
 };
 
