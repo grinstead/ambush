@@ -28,6 +28,9 @@ export function vec(x: number, y: number, z: number = 0): Vec {
 
 /** A constant representing a zero vector */
 export const VEC_ZERO = vec(0, 0, 0);
+export const VEC_X = vec(1, 0, 0);
+export const VEC_Y = vec(0, 1, 0);
+export const VEC_Z = vec(0, 0, 1);
 
 /**
  * Function to add two vectors
@@ -65,6 +68,18 @@ export function scale(a: Vec, scale: number): Vec {
     : VEC_ZERO;
 }
 
+export function rescale(a: Vec, newMagnitude: number): undefined | Vec {
+  if (!newMagnitude) return VEC_ZERO;
+
+  const { x, y, z } = a;
+  const mag = Math.sqrt(x * x + y * y + z * z);
+  if (!mag) return;
+
+  const ratio = newMagnitude / mag;
+
+  return vec(ratio * x, ratio * y, ratio * z);
+}
+
 /**
  * Function to scale the coordinates of a vector by given factors for each axis
  * @param a - The vector to be scaled
@@ -92,6 +107,12 @@ export function dot(a: Vec, b: Vec): number {
   return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
+export function cross(a: Vec, b: Vec): Vec {
+  const { x: ax, y: ay, z: az } = a;
+  const { x: bx, y: by, z: bz } = b;
+  return vec(ay * bz - az * by, az * bx - ax * bz, ax * by - ay * bx);
+}
+
 /**
  * Function to compute the magnitude of a vector
  * @param param0 - Vector with x, y, and z coordinates
@@ -107,10 +128,7 @@ export function magnitude({ x, y, z }: Vec): number {
  * @returns Normalized vector, or undefined if the magnitude is zero
  */
 export function normalize(v: Vec): undefined | Vec {
-  const mag = magnitude(v);
-
-  // If the magnitude is zero, return undefined. Otherwise, return the normalized vector.
-  return mag ? vec(v.x / mag, v.y / mag, v.z / mag) : undefined;
+  return rescale(v, 1);
 }
 
 /**
