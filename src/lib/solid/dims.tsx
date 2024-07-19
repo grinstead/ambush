@@ -10,6 +10,8 @@ export type Dimensions = {
 };
 
 export function createDimsTracker() {
+  const observer = new ResizeObserver(readDims);
+
   let element: undefined | HTMLElement;
   let mounted = false;
 
@@ -40,8 +42,22 @@ export function createDimsTracker() {
 
   return [dimensions, trackDims] as const;
 
-  function trackDims(el: HTMLElement) {
+  function trackDims(el: null | HTMLElement) {
+    if (!el) {
+      if (element) {
+        element = undefined;
+        observer.disconnect();
+      }
+      return;
+    }
+
+    if (element === el) return;
+
+    if (element) observer.unobserve(element);
+
     element = el;
+    observer.observe(el);
+
     if (mounted) readDims();
   }
 
