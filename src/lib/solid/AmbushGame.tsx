@@ -5,6 +5,7 @@ import { GameLoop } from "./GameLoop.tsx";
 import { BaseFrameTimer } from "../FrameTimer.ts";
 import { createMouseTracker } from "./mouse.tsx";
 import { GameEngine, GameEngineContext } from "./GameEngine.tsx";
+import { createDimsTracker } from "./dims.tsx";
 
 export type AmbushGameProps = ParentProps<{
   fallback?: Props<typeof ErrorBoundary>["fallback"];
@@ -22,18 +23,31 @@ export function AmbushGame(props: AmbushGameProps) {
   const timer = new BaseFrameTimer();
 
   const [mouse, trackMouse] = createMouseTracker();
+  const [dims, trackDims] = createDimsTracker();
 
   return (
     <ErrorBoundary fallback={props.fallback ?? ambushDefaultErrorDisplay}>
-      <div ref={trackMouse} class={props.class} style="position:relative">
-        <canvas ref={canvas} style={ABSOLUTE_COVER} />
+      <div
+        ref={(dom) => {
+          trackMouse(dom);
+          trackDims(dom);
+        }}
+        class={props.class}
+        style="position:relative"
+      >
+        <canvas
+          ref={canvas}
+          style={ABSOLUTE_COVER}
+          width={dims.width || undefined}
+          height={dims.height || undefined}
+        />
         <GPUContainer canvas={canvas!}>
           <GameLoop.Provider
             steps={props.steps ?? ["main", "render"]}
             timer={timer}
           >
             <GPUWorkQueue.Provider>
-              <GameEngineContext.Provider value={new GameEngine(mouse)}>
+              <GameEngineContext.Provider value={new GameEngine(mouse, dims)}>
                 {props.children}
               </GameEngineContext.Provider>
             </GPUWorkQueue.Provider>

@@ -1,8 +1,9 @@
 import { createContext } from "solid-js";
-import { MouseAccessors } from "../../exports.ts";
+import { MouseAccessors } from "./mouse.tsx";
+import { Dimensions } from "./dims.tsx";
 
 export const GameEngineContext = createContext<GameEngine>();
 
 export class GameEngine {
-  constructor(readonly mouse: MouseAccessors) {}
+  constructor(readonly mouse: MouseAccessors, readonly area: Dimensions) {}
 }
