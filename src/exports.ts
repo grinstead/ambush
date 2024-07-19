@@ -11,3 +11,6 @@ export * from "@grinstead/webgpu";
 export * from "./lib/solid/solid_timing.ts";
 export * from "./lib/other/Docket.ts";
 export * from "./lib/solid/GameLoop.tsx";
+export * from "./lib/solid/AmbushGame.tsx";
+export * from "./lib/solid/GameEngine.tsx";
+export * from "./lib/solid/solid_utils.tsx";
