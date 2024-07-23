@@ -93,8 +93,17 @@ export function createMouseTracker() {
 
   function handleMouseEvent(e: MouseEvent) {
     batch(() => {
+      let x: number, y: number;
+      if (e.target === activeDom) {
+        x = e.offsetX;
+        y = e.offsetY;
+      } else {
+        x = e.clientX - activeDom!.clientLeft;
+        y = e.clientY - activeDom!.clientTop;
+      }
+
       setTracked(true);
-      setPos((prev) => maybeNewVec(prev, e.offsetX, e.offsetY));
+      setPos((prev) => maybeNewVec(prev, x, y));
       setButtons(e.buttons);
     });
   }
