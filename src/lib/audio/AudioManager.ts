@@ -11,6 +11,8 @@ export class AudioManager {
     | undefined
     | Array<[ArrayBuffer, (audio: Promise<AudioBuffer>) => void]>;
 
+  private musicElement: undefined | HTMLAudioElement;
+
   /**
    * For a proper web browsing experience, it is not possible to start playing
    * sounds until the user interacts with the page. We have to work within that
@@ -48,8 +50,6 @@ export class AudioManager {
     const s = sound instanceof SoundEffect ? sound : new SoundEffect(sound);
 
     if (!s.rawBuffer || s.rawBuffer.isError()) {
-      console.log("LOADING", s.url.toString());
-
       s.rawBuffer = new InspectablePromise(
         fetch(s.url).then((response) => response.arrayBuffer())
       );
@@ -116,5 +116,25 @@ export class AudioManager {
     }
 
     head.start();
+  }
+
+  setMusic(url: string | URL, play: boolean = true) {
+    let dom = this.musicElement;
+    if (dom) {
+      dom.pause();
+    } else {
+      this.musicElement = dom = new Audio();
+      dom.preload = "auto";
+    }
+
+    dom.src = url.toString();
+    dom.loop = true;
+    dom.currentTime = 0;
+
+    if (play) dom.play();
+  }
+
+  pauseMusic() {
+    this.musicElement?.pause();
   }
 }

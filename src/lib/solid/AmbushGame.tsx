@@ -1,4 +1,4 @@
-import { ErrorBoundary, ParentProps } from "solid-js";
+import { ErrorBoundary, onCleanup, ParentProps } from "solid-js";
 import { ABSOLUTE_COVER, Props } from "./solid_utils.tsx";
 import { GPUContainer, GPUWorkQueue } from "@grinstead/webgpu";
 import { GameLoop } from "./GameLoop.tsx";
@@ -24,6 +24,11 @@ export function AmbushGame(props: AmbushGameProps) {
 
   const [mouse, trackMouse] = createMouseTracker();
   const [dims, trackDims] = createDimsTracker();
+  const engine = new GameEngine(mouse, dims);
+
+  onCleanup(() => {
+    engine.audio.pauseMusic();
+  });
 
   return (
     <ErrorBoundary fallback={props.fallback ?? ambushDefaultErrorDisplay}>
@@ -47,7 +52,7 @@ export function AmbushGame(props: AmbushGameProps) {
             timer={timer}
           >
             <GPUWorkQueue.Provider>
-              <GameEngineContext.Provider value={new GameEngine(mouse, dims)}>
+              <GameEngineContext.Provider value={engine}>
                 {props.children}
               </GameEngineContext.Provider>
             </GPUWorkQueue.Provider>
