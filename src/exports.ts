@@ -14,3 +14,6 @@ export * from "./lib/solid/GameLoop.tsx";
 export * from "./lib/solid/AmbushGame.tsx";
 export * from "./lib/solid/GameEngine.tsx";
 export * from "./lib/solid/solid_utils.tsx";
+export * from "./lib/audio/AudioManager.ts";
+export * from "./lib/audio/SoundEffect.ts";
+export * from "./lib/other/InspectablePromise.ts";
