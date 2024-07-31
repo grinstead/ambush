@@ -49,9 +49,20 @@ export class Vec3 {
    * @param v - The other vector.
    * @returns The resulting vector.
    */
-  sub(v: Vec3): Vec3 {
+  minus(v: Vec3): Vec3 {
     const { x, y, z } = this;
     return vec3(x - v.x, y - v.y, z - v.z);
+  }
+
+  /**
+   * Returns `v.minus(this)`. A convenience for when it is more intuitive to say
+   * `a.to(b)` then it is to say `b.minus(a)`.
+   * @param v - The other vector.
+   * @returns The resulting vector.
+   */
+  to(v: Vec3): Vec3 {
+    const { x, y, z } = this;
+    return vec3(v.x - x, v.y - y, v.z - z);
   }
 
   /**
@@ -72,7 +83,10 @@ export class Vec3 {
    * @returns True if the vectors are equal, otherwise false.
    */
   equals(other: Vec3): boolean {
-    return this.x === other.x && this.y === other.y && this.z === other.z;
+    return (
+      this === other ||
+      (this.x === other.x && this.y === other.y && this.z === other.z)
+    );
   }
 
   /**
