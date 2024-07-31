@@ -1,12 +1,11 @@
 import { batch, createSignal, onMount } from "solid-js";
-
-import { VEC_ZERO, Vec, vec, vecEqual } from "../basic/Vec.ts";
+import { vec2, Vec2, VEC2_ZERO, Vec3 } from "../basic/Vec3.ts";
 
 export type Dimensions = {
-  offset: Vec;
+  offset: Vec2;
   width: number;
   height: number;
-  dims: Vec;
+  dims: Vec2;
 };
 
 export function createDimsTracker() {
@@ -20,8 +19,8 @@ export function createDimsTracker() {
     readDims();
   });
 
-  const [offset, setOffset] = createSignal(VEC_ZERO, { equals: vecEqual });
-  const [dims, setDims] = createSignal(VEC_ZERO, { equals: vecEqual });
+  const [offset, setOffset] = createSignal(VEC2_ZERO, { equals: Vec3.equals });
+  const [dims, setDims] = createSignal(VEC2_ZERO, { equals: Vec3.equals });
   const [width, setWidth] = createSignal(0);
   const [height, setHeight] = createSignal(0);
 
@@ -69,8 +68,8 @@ export function createDimsTracker() {
     batch(() => {
       const { width, height } = rect;
 
-      setOffset(vec(rect.x, rect.y));
-      setDims(vec(width, height));
+      setOffset(vec2(rect.x, rect.y));
+      setDims(vec2(width, height));
       setWidth(width);
       setHeight(height);
     });
