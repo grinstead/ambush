@@ -17,3 +17,4 @@ export * from "./lib/solid/solid_utils.tsx";
 export * from "./lib/audio/AudioManager.ts";
 export * from "./lib/audio/SoundEffect.ts";
 export * from "./lib/other/InspectablePromise.ts";
+export * from "./lib/basic/equals.ts";
