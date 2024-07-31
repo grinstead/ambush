@@ -98,6 +98,12 @@ export class Vec3 {
   static equals(a: Vec3, b: Vec3): boolean {
     return a.equals(b);
   }
+
+  toString() {
+    const { x, y, z } = this;
+    // ⟨x,y,z⟩
+    return `\u27E8${x},${y},${z}\u27E9`;
+  }
 }
 
 /**
