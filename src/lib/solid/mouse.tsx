@@ -1,5 +1,5 @@
 import { Accessor, batch, createSignal } from "solid-js";
-import { VEC_ZERO, Vec, maybeNewVec } from "../basic/Vec.ts";
+import { vec2, Vec2, VEC2_ZERO, Vec3 } from "../basic/Vec3.ts";
 
 /**
  * Type representing the accessors for mouse tracking state.
@@ -7,7 +7,7 @@ import { VEC_ZERO, Vec, maybeNewVec } from "../basic/Vec.ts";
  */
 export type MouseAccessors = {
   /** Accessor for the mouse position, which is a vector. */
-  pos: Accessor<Vec>;
+  pos: Accessor<Vec2>;
   /**  Accessor for the mouse button states, represented as a bitmask, see [MouseEvent.buttons](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/buttons) for more details. */
   buttons: Accessor<number>;
   /** Accessor for the tracking status, indicating whether the mouse is being tracked. */
@@ -65,7 +65,7 @@ export type MouseAccessors = {
  * }
  */
 export function createMouseTracker() {
-  const [pos, setPos] = createSignal(VEC_ZERO);
+  const [pos, setPos] = createSignal(VEC2_ZERO, { equals: Vec3.equals });
   const [buttons, setButtons] = createSignal(0);
   const [tracked, setTracked] = createSignal(false);
 
@@ -103,15 +103,16 @@ export function createMouseTracker() {
       }
 
       setTracked(true);
-      setPos((prev) => maybeNewVec(prev, x, y));
+      setPos(vec2(x, y));
       setButtons(e.buttons);
     });
   }
 
+  // todo: do the clientX offsetX thing
   function handleMouseLeave(e: MouseEvent) {
     batch(() => {
       setTracked(false);
-      setPos((prev) => maybeNewVec(prev, e.offsetX, e.offsetY));
+      setPos(vec2(e.offsetX, e.offsetY));
       setButtons(0);
     });
   }

@@ -61,8 +61,7 @@ export class Vec3 {
    * @returns The resulting vector.
    */
   to(v: Vec3): Vec3 {
-    const { x, y, z } = this;
-    return vec3(v.x - x, v.y - y, v.z - z);
+    return v.minus(this);
   }
 
   /**
@@ -75,6 +74,18 @@ export class Vec3 {
     const { x: bx, y: by, z: bz } = v;
 
     return vec3(ay * bz - az * by, az * bx - ax * bz, ax * by - ay * bx);
+  }
+
+  xy(): [number, number] {
+    return [this.x, this.y];
+  }
+
+  xyz(): [number, number, number] {
+    return [this.x, this.y, this.z];
+  }
+
+  clone(): Vec3 {
+    return new Vec3(this.x, this.y, this.z);
   }
 
   /**
@@ -116,7 +127,8 @@ export function magnitude({ x, y, z }: Vec3): number {
 }
 
 /**
- * Rescales a vector to a new magnitude.
+ * Rescales a vector to a new magnitude. Equivalent to dividing by the old
+ * magnitude and multiplying by the new one.
  * @param v - The vector.
  * @param newMag - The new magnitude.
  * @returns The rescaled vector or undefined if the original magnitude is zero.
@@ -128,7 +140,18 @@ export function rescale(v: Vec3, newMag: number): Vec3 | undefined {
   const ratio = newMag / Math.sqrt(x * x + y * y + z * z);
 
   // ratio will be NaN if the magnitude was 0
-  return ratio === ratio ? vec3(ratio * x, ratio * y, ratio * z) : undefined;
+  return ratio === ratio
+    ? newVec3(v, ratio * x, ratio * y, ratio * z)
+    : undefined;
+}
+
+/**
+ * Multiplies a vector by a scalar.
+ * @param v - The vector.
+ * @param scalar - The scalar to multiply by
+ */
+export function scale(v: Vec3, scalar: number): Vec3 {
+  return newVec3(v, scalar * v.x, scalar * v.y, scalar * v.z);
 }
 
 /**
@@ -169,6 +192,22 @@ export function vec3(x: number, y: number, z: number): Vec3 {
 }
 
 /**
+ * Creates a new Vec3 if any of the coordinates are different, otherwise returns
+ * the current vec3. Used for potential memory savings.
+ */
+export function newVec3(old: Vec3, x: number, y: number, z: number): Vec3 {
+  return (old.x === x && old.y === y && old.z === z && old) || vec3(x, y, z);
+}
+
+/**
+ * Creates a new Vec2 if any of the coordinates are different, otherwise returns
+ * the current Vec2. Used for potential memory savings.
+ */
+export function newVec2(old: Vec3, x: number, y: number): Vec2 {
+  return newVec3(old, x, y, 0) as Vec2;
+}
+
+/**
  * Creates a new 2-dimensional vector.
  * @param x - The x coordinate.
  * @param y - The y coordinate.
@@ -178,12 +217,11 @@ export function vec2(x: number, y: number): Vec2 {
   return new Vec3(x, y, 0) as Vec2;
 }
 
-export const VEC_ZERO = vec2(0, 0);
-export const VEC_X = vec2(1, 0);
-export const VEC_Y = vec2(0, 1);
-export const VEC_Z = vec3(0, 0, 1);
+export const VEC_ZERO = Object.freeze(vec3(0, 0, 0));
+export const VEC_X = Object.freeze(vec3(1, 0, 0));
+export const VEC_Y = Object.freeze(vec3(0, 1, 0));
+export const VEC_Z = Object.freeze(vec3(0, 0, 1));
 
-Object.freeze(VEC_ZERO);
-Object.freeze(VEC_X);
-Object.freeze(VEC_Y);
-Object.freeze(VEC_Z);
+export const VEC2_ZERO = VEC_ZERO as Vec2;
+export const VEC2_X = VEC_X as Vec2;
+export const VEC2_Y = VEC_Y as Vec2;
