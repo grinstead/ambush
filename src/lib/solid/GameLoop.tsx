@@ -1,6 +1,5 @@
 import {
   JSXElement,
-  createComputed,
   createContext,
   createMemo,
   createRenderEffect,
@@ -43,27 +42,6 @@ export class GameLoop {
   private nextAnimFrame: undefined | ReturnType<typeof requestAnimationFrame>;
 
   constructor(public steps: Array<string>, public timer: BaseFrameTimer) {}
-
-  static Provider(props: GameLoopProps) {
-    let gameloop: undefined | GameLoop;
-
-    createComputed(() => {
-      const { timer = new BaseFrameTimer(), steps } = props;
-
-      if (gameloop) {
-        gameloop.steps = steps;
-        gameloop.timer = timer;
-      } else {
-        gameloop = new GameLoop(steps, timer);
-      }
-    });
-
-    return (
-      <GameLoopContext.Provider value={gameloop}>
-        {props.children}
-      </GameLoopContext.Provider>
-    );
-  }
 
   /**
    * Registers a step in the game loop.
