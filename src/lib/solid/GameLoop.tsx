@@ -41,7 +41,22 @@ export class GameLoop {
   private activePending = 0;
   private nextAnimFrame: undefined | ReturnType<typeof requestAnimationFrame>;
 
-  constructor(public steps: Array<string>, public timer: BaseFrameTimer) {}
+  constructor(
+    public steps: Array<string>,
+    public readonly timer: BaseFrameTimer
+  ) {
+    this.timer.subscribePauseChange(() => {
+      if (timer.paused) {
+        if (this.nextAnimFrame) {
+          cancelAnimationFrame(this.nextAnimFrame);
+          this.nextAnimFrame = undefined;
+        }
+      } else {
+        // timer is unpaused
+        this.schedule();
+      }
+    });
+  }
 
   /**
    * Registers a step in the game loop.
@@ -87,17 +102,23 @@ export class GameLoop {
   }
 
   private schedule() {
+    if (this.timer.paused) return;
+
     this.nextAnimFrame ??= requestAnimationFrame(this.runLoop);
   }
 
   private runLoop = () => {
     const { timer, steps, stepQueues } = this;
 
+    this.nextAnimFrame = undefined;
+
+    if (timer.paused) {
+      return;
+    }
+
     const stepInfo: GameLoopStepInfo = {
       deltaTime: timer.markFrame(),
     };
-
-    this.nextAnimFrame = undefined;
 
     // check if we have a reason to run the loop, something may have been added,
     // scheduled, then removed before we acted on it

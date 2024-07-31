@@ -43,7 +43,17 @@ export class BaseFrameTimer implements FrameTimer {
   }
 
   pause() {
+    if (this.paused) return;
+
     this.paused = true;
+    this.pauseSubs?.dispatch(undefined);
+  }
+
+  unpause() {
+    if (!this.paused) return;
+
+    this.paused = false;
+    this.pauseSubs?.dispatch(undefined);
   }
 
   /**
@@ -97,9 +107,16 @@ export class BaseFrameTimer implements FrameTimer {
   // event listening
 
   private subs?: SingleEventTarget;
+  private pauseSubs?: SingleEventTarget;
 
   subscribeFrameTime(listener: SimpleEventListener) {
     return (this.subs ??= new SingleEventTarget("frametime")).subscribe(
+      listener
+    );
+  }
+
+  subscribePauseChange(listener: SimpleEventListener) {
+    return (this.pauseSubs ??= new SingleEventTarget("pausechange")).subscribe(
       listener
     );
   }
