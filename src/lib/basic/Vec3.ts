@@ -1,5 +1,11 @@
 /**
  * Class representing a 3-dimensional vector.
+ *
+ * It is intended to be used immutably, and all the built-in operations and
+ * methods will create new vectors. If you wish (for memory reasons or
+ * convenience) to mutate the x/y/z values, then call {@link mutable} which will
+ * clone the vector, guaranteeing you don't try overriding the builtin vectors
+ * like VEC_ZERO
  */
 export class Vec3 {
   readonly x: number;
@@ -61,7 +67,7 @@ export class Vec3 {
   }
 
   /**
-   * Checks if this vector is equal to another vector.
+   * Checks if this vector has the same coordinates as another vector.
    * @param other - The other vector.
    * @returns True if the vectors are equal, otherwise false.
    */
@@ -70,7 +76,7 @@ export class Vec3 {
   }
 
   /**
-   * Static method to check if two vectors are equal.
+   * Static method to check if two vectors have the same coordinates.
    * @param a - The first vector.
    * @param b - The second vector.
    * @returns True if the vectors are equal, otherwise false.
@@ -99,13 +105,10 @@ export function rescale(v: Vec3, newMag: number): Vec3 | undefined {
   if (!newMag) return VEC_ZERO;
 
   const { x, y, z } = v;
-  const mag2 = x * x + y * y + z * z;
+  const ratio = newMag / Math.sqrt(x * x + y * y + z * z);
 
-  if (!mag2) return;
-
-  const ratio = newMag / Math.sqrt(mag2);
-
-  return vec3(ratio * x, ratio * y, ratio * z);
+  // ratio will be NaN if the magnitude was 0
+  return ratio === ratio ? vec3(ratio * x, ratio * y, ratio * z) : undefined;
 }
 
 /**
@@ -124,7 +127,7 @@ export type Vec3Mutable = Vec3 & {
 };
 
 /**
- * Converts a read-only vector to a mutable vector.
+ * Clones a read-only vector into a new mutable vector.
  * @param v - The read-only vector.
  * @returns The mutable vector.
  */
