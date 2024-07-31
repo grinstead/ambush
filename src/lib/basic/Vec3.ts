@@ -137,12 +137,11 @@ export function rescale(v: Vec3, newMag: number): Vec3 | undefined {
   if (!newMag) return VEC_ZERO;
 
   const { x, y, z } = v;
-  const ratio = newMag / Math.sqrt(x * x + y * y + z * z);
+  const mag2 = x * x + y * y + z * z;
+  if (!mag2) return;
 
-  // ratio will be NaN if the magnitude was 0
-  return ratio === ratio
-    ? newVec3(v, ratio * x, ratio * y, ratio * z)
-    : undefined;
+  const ratio = newMag / Math.sqrt(mag2);
+  return newVec3(v, ratio * x, ratio * y, ratio * z);
 }
 
 /**
