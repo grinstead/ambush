@@ -4,6 +4,53 @@ import {
 } from "../other/InspectablePromise.ts";
 import { SoundEffect } from "./SoundEffect.ts";
 
+export class Music {
+  dom?: HTMLAudioElement = undefined;
+  _loop: boolean = true;
+
+  constructor(readonly manager: AudioManager, readonly url: string) {}
+
+  get loop() {
+    return this._loop;
+  }
+
+  set loop(loop: boolean) {
+    this._loop = loop;
+
+    const { dom } = this;
+    if (dom) {
+      dom.loop = loop;
+    }
+  }
+
+  preload(): HTMLAudioElement {
+    let { dom } = this;
+
+    if (!dom) {
+      this.dom = dom = new Audio();
+      dom.src = this.url;
+      dom.loop = this._loop;
+    }
+
+    return dom;
+  }
+
+  play(restart: boolean = false) {
+    AudioManager.M.p(this, restart);
+  }
+
+  pause() {
+    AudioManager.M.s(this);
+  }
+
+  stop() {
+    AudioManager.M.s(this);
+    if (this.dom) {
+      this.dom.currentTime = 0;
+    }
+  }
+}
+
 export class AudioManager {
   context: undefined | AudioContext;
   readonly activeSounds: WeakMap<{}, AudioBufferSourceNode> = new WeakMap();
@@ -11,7 +58,9 @@ export class AudioManager {
     | undefined
     | Array<[ArrayBuffer, (audio: Promise<AudioBuffer>) => void]>;
 
-  private musicElement: undefined | HTMLAudioElement;
+  private readonly soundtracks: Map<string, Music> = new Map();
+  private activeMusic: undefined | Music;
+  private prevMusic: undefined | Music;
 
   /**
    * For a proper web browsing experience, it is not possible to start playing
@@ -32,6 +81,10 @@ export class AudioManager {
         resolve(context.decodeAudioData(raw));
       }
     }
+
+    this.soundtracks.forEach((st) => {
+      st.preload();
+    });
   }
 
   preloadAll(sounds: Array<SoundEffect | URL>): Array<SoundEffect>;
@@ -118,23 +171,70 @@ export class AudioManager {
     head.start();
   }
 
-  setMusic(url: string | URL, play: boolean = true) {
-    let dom = this.musicElement;
-    if (dom) {
-      dom.pause();
-    } else {
-      this.musicElement = dom = new Audio();
-      dom.preload = "auto";
+  music(): undefined | Music;
+  music(url: string | URL): Music;
+  music(url?: string | URL): undefined | Music {
+    if (!url) return this.activeMusic ?? this.prevMusic;
+
+    const { soundtracks } = this;
+
+    const urlStr = String(url);
+    let soundtrack = soundtracks.get(urlStr);
+
+    if (!soundtrack) {
+      soundtrack = new Music(this, urlStr);
+      soundtracks.set(urlStr, soundtrack);
     }
 
-    dom.src = url.toString();
-    dom.loop = true;
-    dom.currentTime = 0;
-
-    if (play) dom.play();
+    return soundtrack;
   }
 
-  pauseMusic() {
-    this.musicElement?.pause();
+  /**
+   * Cleans up internal resources, at least theoretically.
+   *
+   * At the moment it only stops the music.
+   */
+  destroy() {
+    this.activeMusic?.stop();
   }
+
+  /**
+   * Internal methods to control the music audio, ignore this object.
+   */
+  static M = {
+    /** Plays the current soundtrack */
+    p(music: Music, restart: boolean) {
+      let { manager } = music;
+
+      const active = manager.activeMusic;
+      if (active === music) {
+        if (restart) {
+          music.dom!.currentTime = 0;
+        }
+        return;
+      }
+
+      active?.dom?.pause();
+
+      manager.prevMusic = active;
+      manager.activeMusic = music;
+
+      const dom = music.preload();
+      if (restart) dom.currentTime = 0;
+      dom.play();
+    },
+
+    /** Stops the soundtrack */
+    s(st: Music) {
+      const { manager } = st;
+
+      const active = manager.activeMusic;
+      if (active !== st) return;
+
+      manager.prevMusic = active;
+      manager.activeMusic = undefined;
+
+      st.dom?.pause();
+    },
+  };
 }

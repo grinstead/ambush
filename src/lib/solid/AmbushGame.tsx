@@ -47,7 +47,7 @@ export function AmbushGame(props: AmbushGameProps) {
   const engine = new GameEngine(gameloop!, mouse, dims);
 
   onCleanup(() => {
-    engine.audio.pauseMusic();
+    engine.audio.destroy();
   });
 
   return (
