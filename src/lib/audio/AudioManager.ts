@@ -58,6 +58,8 @@ export class AudioManager {
     | undefined
     | Array<[ArrayBuffer, (audio: Promise<AudioBuffer>) => void]>;
 
+  private _volume = 1;
+
   private readonly soundtracks: Map<string, Music> = new Map();
   private activeMusic: undefined | Music;
   private prevMusic: undefined | Music;
@@ -85,6 +87,10 @@ export class AudioManager {
     this.soundtracks.forEach((st) => {
       st.preload();
     });
+  }
+
+  setVolume(volume: number) {
+    this._volume = volume;
   }
 
   preloadAll(sounds: Array<SoundEffect | URL>): Array<SoundEffect>;
@@ -128,6 +134,7 @@ export class AudioManager {
 
   play(source: null | {}, sound: SoundEffect, volume: number = 1) {
     const { activeSounds, context } = this;
+    const vol = volume * this._volume;
 
     if (!context) {
       console.warn(`AudioManager.play called before AudioManager.enable`);
@@ -148,18 +155,18 @@ export class AudioManager {
       return;
     }
 
-    if (volume <= 0) return;
+    if (vol <= 0) return;
 
     const { destination } = context;
 
     const head = context.createBufferSource();
     head.buffer = sound.decoded.get();
 
-    if (volume >= 1) {
+    if (vol >= 1) {
       head.connect(destination);
     } else {
       const gainNode = context.createGain();
-      gainNode.gain.value = volume;
+      gainNode.gain.value = vol;
       head.connect(gainNode);
       gainNode.connect(destination);
     }
